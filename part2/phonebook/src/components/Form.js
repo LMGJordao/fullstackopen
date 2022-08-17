@@ -1,16 +1,31 @@
+import personsService from "../services/persons";
+
 const Form = ({props}) => {
   const {newName, newPhone, persons, setNewName, setPersons, setPhone} = props;
+
   const addNewName = (event) => {
     event.preventDefault();
-    
-    if (persons.findIndex((person) => person.name === newName || person.phone === newPhone) >= 0)
-      alert(`${newName} is already added to phonebook, with the number ${newPhone}`);
+    let p;
+    if ((p = persons.findIndex((person) => person.name === newName || person.number === newPhone)) >= 0) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        personsService
+          .update(persons[p].id, {...persons[p], number: newPhone})
+          .then(updated => {
+            setPersons(persons.map(p => updated.name===p.name ? updated : p));
+          });
+      }
+    }
     else {
       const nameObj = {
         name: newName,
-        phone: newPhone
+        number: newPhone
       };
-      setPersons(persons.concat(nameObj));
+      personsService
+        .create(nameObj)
+        .then(newPerson => {
+          console.log(newPerson)
+          setPersons(persons.concat(newPerson));
+        });
     }
 
     event.target.reset();

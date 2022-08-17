@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+
+import personsService from "./services/persons";
+
 import Number from './components/Number';
 import Form from './components/Form'
 import Filter from './components/Filter';
@@ -11,14 +13,21 @@ const App = () => {
   const [filter, setFilter] = useState('');
 
   const hook = () => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(res => {
-        setPersons(res.data);
+    personsService
+      .getAll()
+      .then(savedPersons => {
+        setPersons(savedPersons);
       });
   };
-
   useEffect(hook, []);
+
+  const handleDelete = (id, name) => () => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personsService
+        .deleteOne(id)
+        .then(_ => setPersons(persons.filter(person => person.id !== id)));
+    }    
+  };
 
   return (
     <div>
@@ -33,7 +42,7 @@ const App = () => {
             : true;
         })
         .map((person) => {
-          return <Number key={person.name} name={person.name} phone={person.number} />
+          return <Number key={person.name} name={person.name} phone={person.number} handleDelete={handleDelete(person.id, person.name)} />
       })}
     </div>
   )
