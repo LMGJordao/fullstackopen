@@ -1,7 +1,7 @@
 import personsService from "../services/persons";
 
 const Form = ({props}) => {
-  const {newName, newPhone, persons, setNewName, setPersons, setPhone} = props;
+  const {newName, newPhone, persons, setNewName, setPersons, setPhone, setNotificationMessage, setNotificationType} = props;
 
   const addNewName = (event) => {
     event.preventDefault();
@@ -12,6 +12,9 @@ const Form = ({props}) => {
           .update(persons[p].id, {...persons[p], number: newPhone})
           .then(updated => {
             setPersons(persons.map(p => updated.name===p.name ? updated : p));
+            setNotificationMessage(`${persons[p].name} number was changed to ${newPhone}`);
+            setNotificationType('success');
+            setTimeout(() => setNotificationMessage(null), 5000);
           });
       }
     }
@@ -23,8 +26,10 @@ const Form = ({props}) => {
       personsService
         .create(nameObj)
         .then(newPerson => {
-          console.log(newPerson)
           setPersons(persons.concat(newPerson));
+          setNotificationMessage(`${newPerson.name} was added`);
+          setNotificationType('success');
+          setTimeout(() => setNotificationMessage(null), 5000);
         });
     }
 
